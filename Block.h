@@ -41,6 +41,41 @@ private:
 	std::vector<unsigned int> quads;
 };
 
+class BezierSprings : public Object {
+public:
+	BezierSprings(Shader sh, std::vector<glm::vec3>& pt);
+
+	void DrawObject(glm::mat4 mvp) override;
+
+	void UpdatePoints(std::vector<glm::vec3>& pt);
+private:
+
+	void update_object() override;
+
+	std::vector<glm::vec3> bezier_points;
+
+	std::vector<float> points;
+	std::vector<unsigned int> quads;
+};
+
+class FrameSprings : public Object {
+public:
+	FrameSprings(Shader sh, std::vector<glm::vec3>& bezier_pts, std::vector<glm::vec3>& frame_pts);
+
+	void DrawObject(glm::mat4 mvp) override;
+
+	void UpdatePoints(std::vector<glm::vec3>& bezier_pts, std::vector<glm::vec3>& frame_pts);
+private:
+
+	void update_object() override;
+
+	std::vector<glm::vec3> bezier_points;
+	std::vector<glm::vec3> frame_points;
+
+	std::vector<float> points;
+	std::vector<unsigned int> quads;
+};
+
 
 class Block :
 	public Object
@@ -75,6 +110,8 @@ private:
 
 	bool draw_frame = true;
 	bool draw_bezier_points = true;
+	bool draw_bezier_springs = true;
+	bool draw_frame_springs = true;
 
 	Shader shader_bez;
 
@@ -82,5 +119,7 @@ private:
 	std::vector<unsigned int> quads;
 
 	std::unique_ptr<ConstraintBox> constraint_box;
-	std::unique_ptr<BezierPoints> bezier_ppoints;
+	std::unique_ptr<BezierPoints> bezier_vertices;
+	std::unique_ptr<BezierSprings> bezier_springs;
+	std::unique_ptr<FrameSprings> frame_springs;
 };
