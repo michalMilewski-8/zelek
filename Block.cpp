@@ -152,6 +152,7 @@ Block::Block(Shader sh) :
 	bezier_vertices = std::make_unique<BezierPoints>(sh, bezier_points);
 	bezier_springs = std::make_unique<BezierSprings>(sh, bezier_points);
 	frame_springs = std::make_unique<FrameSprings>(sh, bezier_points, frame_points);
+	bezier_box = std::make_unique<BezierBox>(sh, bezier_points);
 
 	update_object();
 }
@@ -200,6 +201,8 @@ void Block::DrawObject(glm::mat4 mvp)
 		bezier_springs->DrawObject(mvp);
 	if (draw_frame_springs)
 		frame_springs->DrawObject(mvp);
+	if (draw_bezier_box)
+		bezier_box->DrawObject(mvp);
 }
 
 ConstraintBox::ConstraintBox(Shader sh, std::vector<glm::vec3>& frame_points) :
@@ -555,7 +558,7 @@ void FrameSprings::update_object()
 	pts.push_back(frame_points[7]);
 	pts.push_back(bezier_points[15]);
 
-	for(const auto& pt: pts){
+	for (const auto& pt : pts) {
 		points.push_back(pt.x);
 		points.push_back(pt.y);
 		points.push_back(pt.z);
@@ -615,5 +618,130 @@ void FrameSprings::DrawObject(glm::mat4 mvp)
 	//glDrawElements(GL_TRIANGLES, quads.size(), GL_UNSIGNED_INT, 0);
 	glLineWidth(3.0f);
 	glDrawElements(GL_LINES, quads.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+BezierBox::BezierBox(Shader sh, std::vector<glm::vec3>& bezier_pts) :
+	Object(sh, 3)
+{
+	//shader = Shader("shader.vert", "shader.frag");
+	shader = Shader("tes_shader.vert", "tes_shader.frag", "tes_shader.tesc", "tes_shader.tese");
+	color = { 0.5,0,0.2,1.0 };
+	bezier_points = {};
+	points = {};
+	quads = {};
+
+	for (const auto& pt : bezier_pts) {
+		bezier_points.push_back(pt);
+	}
+	update_object();
+}
+
+void BezierBox::UpdatePoints(std::vector<glm::vec3>& bezier_pts)
+{
+	bezier_points.clear();
+
+	for (const auto& pt : bezier_pts) {
+		bezier_points.push_back(pt);
+	}
+
+	need_update = true;
+}
+
+void BezierBox::update_object()
+{
+	quads.clear();
+	points.clear();
+
+	for (const auto& pt : bezier_points) {
+		points.push_back(pt.x);
+		points.push_back(pt.y);
+		points.push_back(pt.z);
+
+		//points.push_back(color.r);
+		//points.push_back(color.g);
+		//points.push_back(color.b);
+		//points.push_back(color.a);
+	}
+
+
+	for (int i = 0; i < 16; i++) {
+		quads.push_back(i);
+	}
+
+	for (int i = 48; i < 64; i++) {
+		quads.push_back(i);
+	}
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			quads.push_back(i * 16 + j);
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			quads.push_back(i * 16 + j + 12);
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			quads.push_back(i * 16 + j * 4);
+		}
+	}
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			quads.push_back(i * 16 + j * 4 + 3);
+		}
+	}
+
+	shader.use();
+	// 1. bind Vertex Array Object
+	glBindVertexArray(VAO);
+	// 2. copy our vertices array in a vertex buffer for OpenGL to use
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * points.size(), points.data(), GL_DYNAMIC_DRAW);
+	// 3. copy our index array in a element buffer for OpenGL to use
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * quads.size(), quads.data(), GL_DYNAMIC_DRAW);
+	// 4. then set the vertex attributes pointers
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, description_number * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, description_number * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
+}
+
+void BezierBox::DrawObject(glm::mat4 mvp) {
+
+	if (need_update) {
+		update_object();
+		need_update = false;
+	}
+
+	Object::DrawObject(mvp);
+	glm::mat4 model = translate * rotate * resize;
+	glm::mat4 vp = mvp;
+	shader.use();
+
+	glPatchParameteri(GL_PATCH_VERTICES, 16);
+
+	glBindVertexArray(VAO);
+
+	//glm::mat4 trmodel = glm::transpose(glm::inverse(model));
+	//int projectionLoc = glGetUniformLocation(shader.ID, "model");
+	//glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+	//int trmodelLoc = glGetUniformLocation(shader.ID, "trmodel");
+	//glUniformMatrix4fv(trmodelLoc, 1, GL_FALSE, glm::value_ptr(trmodel));
+
+	//int mvLoc = glGetUniformLocation(shader.ID, "vp");
+	//glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(vp));
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glDrawElements(GL_TRIANGLES, quads.size(), GL_UNSIGNED_INT, 0);
+	//glLineWidth(3.0f);
+	glDrawElements(GL_PATCHES, quads.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }

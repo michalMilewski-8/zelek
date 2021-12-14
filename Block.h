@@ -76,6 +76,22 @@ private:
 	std::vector<unsigned int> quads;
 };
 
+class BezierBox : public Object {
+public:
+	BezierBox(Shader sh, std::vector<glm::vec3>& bezier_pts);
+
+	void DrawObject(glm::mat4 mvp) override;
+
+	void UpdatePoints(std::vector<glm::vec3>& bezier_pts);
+private:
+
+	void update_object() override;
+
+	std::vector<glm::vec3> bezier_points;
+
+	std::vector<float> points;
+	std::vector<unsigned int> quads;
+};
 
 class Block :
 	public Object
@@ -112,6 +128,7 @@ private:
 	bool draw_bezier_points = true;
 	bool draw_bezier_springs = true;
 	bool draw_frame_springs = true;
+	bool draw_bezier_box = true;
 
 	Shader shader_bez;
 
@@ -122,4 +139,5 @@ private:
 	std::unique_ptr<BezierPoints> bezier_vertices;
 	std::unique_ptr<BezierSprings> bezier_springs;
 	std::unique_ptr<FrameSprings> frame_springs;
+	std::unique_ptr<BezierBox> bezier_box;
 };

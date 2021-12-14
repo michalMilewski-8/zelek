@@ -202,6 +202,10 @@
     <None Include="shader_grid.vert" />
     <None Include="shader_tex.frag" />
     <None Include="shader_tex.vert" />
+    <None Include="tes_shader.frag" />
+    <None Include="tes_shader.tesc" />
+    <None Include="tes_shader.tese" />
+    <None Include="tes_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
