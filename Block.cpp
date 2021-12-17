@@ -408,12 +408,51 @@ BezierSprings::BezierSprings(Shader sh, std::shared_ptr<Parameters> params_, std
 					springs.push_back(std::make_shared<Spring>(params,
 						frame_points[i * 16 + j * 4 + k],
 						frame_points[i * 16 + j * 4 + k + 1], false));
+
+					if (j < 3)
+					{
+						springs.push_back(std::make_shared<Spring>(params,
+							frame_points[i * 16 + j * 4 + k],
+							frame_points[i * 16 + (j + 1) * 4 + k + 1], false));
+					}
+					if (j > 0)
+					{
+						springs.push_back(std::make_shared<Spring>(params,
+							frame_points[i * 16 + j * 4 + k],
+							frame_points[i * 16 + (j - 1) * 4 + k + 1], false));
+					}
+
+					if (i < 3)
+					{
+						springs.push_back(std::make_shared<Spring>(params,
+							frame_points[i * 16 + j * 4 + k],
+							frame_points[(i + 1) * 16 + j * 4 + k + 1], false));
+					}
+					if (i > 0)
+					{
+						springs.push_back(std::make_shared<Spring>(params,
+							frame_points[i * 16 + j * 4 + k],
+							frame_points[(i - 1) * 16 + j * 4 + k + 1], false));
+					}
 				}
 
 				if (j < 3) {
 					springs.push_back(std::make_shared<Spring>(params,
 						frame_points[i * 16 + j * 4 + k],
 						frame_points[i * 16 + (j + 1) * 4 + k], false));
+
+					if (i < 3)
+					{
+						springs.push_back(std::make_shared<Spring>(params,
+							frame_points[i * 16 + j * 4 + k],
+							frame_points[(i + 1) * 16 + (j + 1) * 4 + k], false));
+					}
+					if (i > 0)
+					{
+						springs.push_back(std::make_shared<Spring>(params,
+							frame_points[i * 16 + j * 4 + k],
+							frame_points[(i - 1) * 16 + (j + 1) * 4 + k], false));
+					}
 				}
 
 				if (i < 3) {
