@@ -338,6 +338,11 @@ void create_gui() {
 	ImGui::SliderFloat("k", &params->k, 0.0f, 100.0f);
 	ImGui::SliderFloat("c1", &params->c1, 0.01f, 100.0f);
 	ImGui::SliderFloat("c2", &params->c2, 0.01f, 100.0f);
+	ImGui::Checkbox("draw_bezier_points", &params->draw_bezier_points);
+	ImGui::Checkbox("draw_bezier_springs", &params->draw_bezier_springs);
+	ImGui::Checkbox("draw_frame_springs", &params->draw_frame_springs);
+	ImGui::Checkbox("draw_frame", &params->draw_frame);
+	ImGui::Checkbox("draw_bezier_box", &params->draw_bezier_box);
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	ImGui::End();

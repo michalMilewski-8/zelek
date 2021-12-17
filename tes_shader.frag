@@ -6,5 +6,7 @@ void main()
 {
 //    if(f_color.x < 0.5f) discard;
 //    FragColor = vec4(0.7f,0.7f,0.7f,0.5f);
-    FragColor = f_color;
+vec4 color = f_color;
+color.w = 0.5f;
+    FragColor = color;
 }

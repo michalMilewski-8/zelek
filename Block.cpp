@@ -174,7 +174,7 @@ void Block::DrawObject(glm::mat4 mvp)
 		update_object();
 		need_update = false;
 	}
-	if (draw_frame) {
+	if (params->draw_frame) {
 		Object::DrawObject(mvp);
 		glm::mat4 model = translate * rotate * resize;
 		glm::mat4 vp = mvp;
@@ -206,13 +206,13 @@ void Block::DrawObject(glm::mat4 mvp)
 		glBindVertexArray(0);
 	}
 	constraint_box->DrawObject(mvp);
-	if (draw_bezier_points)
+	if (params->draw_bezier_points)
 		bezier_vertices->DrawObject(mvp);
-	if (draw_bezier_springs)
+	if (params->draw_bezier_springs)
 		bezier_springs->DrawObject(mvp);
-	if (draw_frame_springs)
+	if (params->draw_frame_springs)
 		frame_springs->DrawObject(mvp);
-	if (draw_bezier_box)
+	if (params->draw_bezier_box)
 		bezier_box->DrawObject(mvp);
 }
 

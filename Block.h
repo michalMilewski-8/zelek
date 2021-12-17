@@ -123,12 +123,6 @@ private:
 
 	glm::vec4 color = { 1,0.3,0,1 };
 
-	bool draw_frame = true;
-	bool draw_bezier_points = true;
-	bool draw_bezier_springs = true;
-	bool draw_frame_springs = true;
-	bool draw_bezier_box = true;
-
 	Shader shader_bez;
 
 	std::vector<float> points;
