@@ -11,6 +11,30 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+class Point
+{
+public:
+	Point(glm::vec3 pos_);
+	void ApplyForce(float dt);
+	glm::vec3 v;
+	glm::vec3 pos;
+	float mass;
+	glm::vec3 F;
+};
+
+class Spring
+{
+	bool is_p1_fixed;
+	float c1;
+	float k;
+	float neutral_length;
+public:
+	Spring(std::shared_ptr<Point> p1_, std::shared_ptr<Point> p2_, bool p1_fixed_);
+	void RecalcSpring(float dt);
+	std::shared_ptr<Point> p1;
+	std::shared_ptr<Point> p2;
+};
+
 
 class ConstraintBox : public Object {
 public:
@@ -26,16 +50,16 @@ private:
 
 class BezierPoints : public Object {
 public:
-	BezierPoints(Shader sh, std::vector<glm::vec3>& pt);
+	BezierPoints(Shader sh, std::vector<std::shared_ptr<Point>>& pt);
 
 	void DrawObject(glm::mat4 mvp) override;
 
-	void UpdatePoints(std::vector<glm::vec3>& pt);
+	void UpdatePoints();
 private:
 
 	void update_object() override;
 
-	std::vector<glm::vec3> bezier_points;
+	std::vector<std::shared_ptr<Point>> bezier_points;
 
 	std::vector<float> points;
 	std::vector<unsigned int> quads;
@@ -43,51 +67,50 @@ private:
 
 class BezierSprings : public Object {
 public:
-	BezierSprings(Shader sh, std::vector<glm::vec3>& pt);
+	BezierSprings(Shader sh, std::vector<std::shared_ptr<Point>>& pt);
 
 	void DrawObject(glm::mat4 mvp) override;
 
-	void UpdatePoints(std::vector<glm::vec3>& pt);
+	void UpdatePoints();
+	void RecalcSprings(float dt);
 private:
 
 	void update_object() override;
 
-	std::vector<glm::vec3> bezier_points;
-
+	std::vector<std::shared_ptr<Spring>> springs;
 	std::vector<float> points;
 	std::vector<unsigned int> quads;
 };
 
 class FrameSprings : public Object {
 public:
-	FrameSprings(Shader sh, std::vector<glm::vec3>& bezier_pts, std::vector<glm::vec3>& frame_pts);
+	FrameSprings(Shader sh, std::vector<std::shared_ptr<Point>>& bezier_points, std::vector<std::shared_ptr<Point>>& frame_points);
 
 	void DrawObject(glm::mat4 mvp) override;
 
-	void UpdatePoints(std::vector<glm::vec3>& bezier_pts, std::vector<glm::vec3>& frame_pts);
+	void UpdatePoints();
+	void RecalcSprings(float dt);
 private:
 
 	void update_object() override;
 
-	std::vector<glm::vec3> bezier_points;
-	std::vector<glm::vec3> frame_points;
-
+	std::vector<std::shared_ptr<Spring>> springs;
 	std::vector<float> points;
 	std::vector<unsigned int> quads;
 };
 
 class BezierBox : public Object {
 public:
-	BezierBox(Shader sh, std::vector<glm::vec3>& bezier_pts);
+	BezierBox(Shader sh, std::vector<std::shared_ptr<Point>>& bezier_pts);
 
 	void DrawObject(glm::mat4 mvp) override;
 
-	void UpdatePoints(std::vector<glm::vec3>& bezier_pts);
+	void UpdatePoints();
 private:
 
 	void update_object() override;
 
-	std::vector<glm::vec3> bezier_points;
+	std::vector<std::shared_ptr<Point>> bezier_points;
 
 	std::vector<float> points;
 	std::vector<unsigned int> quads;
@@ -118,8 +141,8 @@ private:
 
 	unsigned int texture;
 
-	std::vector<glm::vec3> frame_points;
-	std::vector<glm::vec3> bezier_points;
+	std::vector<std::shared_ptr<Point>> frame_points;
+	std::vector<std::shared_ptr<Point>> bezier_points;
 	std::vector<glm::vec3> constraint_box_points;
 
 	glm::vec4 color = { 1,0.3,0,1 };

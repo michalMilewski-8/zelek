@@ -48,7 +48,7 @@ float ipd = 0.01f;
 float d = 0.1f;
 float near = 0.01f;
 float far = 200.0f;
-bool animate = false;
+bool animate = true;
 float T = 0.0f;
 float animation_time = 1.0f;
 int iteration_per_frame = 10;
@@ -96,7 +96,7 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	window = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "baczek 1", NULL, NULL);
+	window = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, "Zelek", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -214,7 +214,7 @@ void draw_scene() {
 		for (int i = 0; i < iteration_per_frame; i++) {
 			block->CalculateFrame(delta);
 		}
-		block->DrawFrame(mvp);
+		block->DrawObject(mvp);
 	}
 	else {
 		block->DrawObject(mvp);
@@ -248,7 +248,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
 	{
 		glm::vec2 diff = (mousePosOld - mousePos) * PRECISION;
-		float cameraSpeed = 5 * deltaTime;
+		float cameraSpeed = 40 * deltaTime;
 		float radius;
 		diff *= cameraSpeed;
 
@@ -289,7 +289,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
 		glm::vec2 diff = (mousePosOld - mousePos) * PRECISION;
-		float cameraSpeed = 0.6f * deltaTime;
+		float cameraSpeed = 2.6f * deltaTime;
 
 		glm::vec2 movement = diff * cameraSpeed;
 
@@ -306,7 +306,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	if (ImGui::GetIO().WantCaptureMouse)
 		return;
 
-	float precision = 0.01f;
+	float precision = 0.05f;
 
 	float movement = 1.0f - yoffset * precision;
 	if (movement <= 0.0f)
