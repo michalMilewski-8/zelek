@@ -123,7 +123,7 @@ void Block::create_stating_points()
 	};
 	for (auto pt : frame_points_tmp)
 	{
-		frame_points.push_back(std::make_shared<Point>(pt));
+		frame_points.push_back(std::make_shared<Point>(params, pt));
 	}
 
 	constraint_box_points = {
@@ -146,24 +146,24 @@ void Block::create_stating_points()
 		for (int j = 0; j < 4; j++) {
 			for (int k = 0; k < 4; k++) {
 				curr_pos = { -1.0f + i * mv ,-1.0f + j * mv,-1.0f + k * mv };
-				bezier_points.push_back(std::make_shared<Point>(curr_pos));
+				bezier_points.push_back(std::make_shared<Point>(params, curr_pos));
 			}
 		}
 	}
 }
 
-Block::Block(Shader sh) :
-	Object(sh, 7)
+Block::Block(Shader sh, std::shared_ptr<Parameters> params_) :
+	Object(sh, 7, params_)
 {
 	shader = sh;
 
 	create_stating_points();
 
-	constraint_box = std::make_unique<ConstraintBox>(sh, constraint_box_points);
-	bezier_vertices = std::make_unique<BezierPoints>(sh, bezier_points);
-	bezier_springs = std::make_unique<BezierSprings>(sh, bezier_points);
-	frame_springs = std::make_unique<FrameSprings>(sh, bezier_points, frame_points);
-	bezier_box = std::make_unique<BezierBox>(sh, bezier_points);
+	constraint_box = std::make_unique<ConstraintBox>(sh, params_, constraint_box_points);
+	bezier_vertices = std::make_unique<BezierPoints>(sh, params_, bezier_points);
+	bezier_springs = std::make_unique<BezierSprings>(sh, params_, bezier_points);
+	frame_springs = std::make_unique<FrameSprings>(sh, params_, bezier_points, frame_points);
+	bezier_box = std::make_unique<BezierBox>(sh, params_, bezier_points);
 
 	update_object();
 }
@@ -216,8 +216,8 @@ void Block::DrawObject(glm::mat4 mvp)
 		bezier_box->DrawObject(mvp);
 }
 
-ConstraintBox::ConstraintBox(Shader sh, std::vector<glm::vec3>& frame_points) :
-	Object(sh, 7)
+ConstraintBox::ConstraintBox(Shader sh, std::shared_ptr<Parameters> params_, std::vector<glm::vec3>& frame_points) :
+	Object(sh, 7, params_)
 {
 	color = { 0.2,0.5,0.9,1.0 };
 
@@ -308,8 +308,8 @@ void ConstraintBox::DrawObject(glm::mat4 mvp)
 	glBindVertexArray(0);
 }
 
-BezierPoints::BezierPoints(Shader sh, std::vector<std::shared_ptr<Point>>& frame_points) :
-	Object(sh, 7)
+BezierPoints::BezierPoints(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& frame_points) :
+	Object(sh, 7, params_)
 {
 	//shader = Shader("shader.vert", "shader.frag");
 	color = { 0.9,0.9,0,1.0 };
@@ -392,8 +392,8 @@ void BezierPoints::update_object()
 	glEnableVertexAttribArray(1);
 }
 
-BezierSprings::BezierSprings(Shader sh, std::vector<std::shared_ptr<Point>>& frame_points) :
-	Object(sh, 7)
+BezierSprings::BezierSprings(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& frame_points) :
+	Object(sh, 7, params_)
 {
 	//shader = Shader("shader.vert", "shader.frag");
 	color = { 0.0,0.8,0.8,1.0 };
@@ -405,21 +405,21 @@ BezierSprings::BezierSprings(Shader sh, std::vector<std::shared_ptr<Point>>& fra
 		for (int j = 0; j < 4; j++) {
 			for (int k = 0; k < 4; k++) {
 				if (k < 3) {
-					springs.push_back(std::make_shared<Spring>(
+					springs.push_back(std::make_shared<Spring>(params,
 						frame_points[i * 16 + j * 4 + k],
-						frame_points[i * 16 + j * 4 + k + 1], false, 15.0f));
+						frame_points[i * 16 + j * 4 + k + 1], false));
 				}
 
 				if (j < 3) {
-					springs.push_back(std::make_shared<Spring>(
+					springs.push_back(std::make_shared<Spring>(params,
 						frame_points[i * 16 + j * 4 + k],
-						frame_points[i * 16 + (j + 1) * 4 + k], false,15.0f));
+						frame_points[i * 16 + (j + 1) * 4 + k], false));
 				}
 
 				if (i < 3) {
-					springs.push_back(std::make_shared<Spring>(
+					springs.push_back(std::make_shared<Spring>(params,
 						frame_points[i * 16 + j * 4 + k],
-						frame_points[(i + 1) * 16 + j * 4 + k], false, 15.0f));
+						frame_points[(i + 1) * 16 + j * 4 + k], false));
 				}
 			}
 		}
@@ -512,8 +512,8 @@ void BezierSprings::RecalcSprings(float dt)
 		spring->RecalcSpring(dt);
 }
 
-FrameSprings::FrameSprings(Shader sh, std::vector<std::shared_ptr<Point>>& bezier_points, std::vector<std::shared_ptr<Point>>& frame_points) :
-	Object(sh, 7)
+FrameSprings::FrameSprings(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& bezier_points, std::vector<std::shared_ptr<Point>>& frame_points) :
+	Object(sh, 7, params_)
 {
 	//shader = Shader("shader.vert", "shader.frag");
 	color = { 0.5,0,0.2,1.0 };
@@ -521,14 +521,14 @@ FrameSprings::FrameSprings(Shader sh, std::vector<std::shared_ptr<Point>>& bezie
 	points = {};
 	quads = {};
 
-	springs.push_back(std::make_shared<Spring>(frame_points[0], bezier_points[0],  true,20.0f));
-	springs.push_back(std::make_shared<Spring>(frame_points[1], bezier_points[48], true,20.0f));
-	springs.push_back(std::make_shared<Spring>(frame_points[2], bezier_points[51], true,20.0f));
-	springs.push_back(std::make_shared<Spring>(frame_points[3], bezier_points[3],  true,20.0f));
-	springs.push_back(std::make_shared<Spring>(frame_points[4], bezier_points[12], true,20.0f));
-	springs.push_back(std::make_shared<Spring>(frame_points[5], bezier_points[60], true,20.0f));
-	springs.push_back(std::make_shared<Spring>(frame_points[6], bezier_points[63], true,20.0f));
-	springs.push_back(std::make_shared<Spring>(frame_points[7], bezier_points[15], true,20.0f));
+	springs.push_back(std::make_shared<Spring>(params, frame_points[0], bezier_points[0], true));
+	springs.push_back(std::make_shared<Spring>(params, frame_points[1], bezier_points[48], true));
+	springs.push_back(std::make_shared<Spring>(params, frame_points[2], bezier_points[51], true));
+	springs.push_back(std::make_shared<Spring>(params, frame_points[3], bezier_points[3], true));
+	springs.push_back(std::make_shared<Spring>(params, frame_points[4], bezier_points[12], true));
+	springs.push_back(std::make_shared<Spring>(params, frame_points[5], bezier_points[60], true));
+	springs.push_back(std::make_shared<Spring>(params, frame_points[6], bezier_points[63], true));
+	springs.push_back(std::make_shared<Spring>(params, frame_points[7], bezier_points[15], true));
 
 	for (int i = 0; i < 16; i++) {
 		quads.push_back(i);
@@ -619,8 +619,8 @@ void FrameSprings::DrawObject(glm::mat4 mvp)
 	glBindVertexArray(0);
 }
 
-BezierBox::BezierBox(Shader sh, std::vector<std::shared_ptr<Point>>& bezier_pts) :
-	Object(sh, 3)
+BezierBox::BezierBox(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& bezier_pts) :
+	Object(sh, 3, params_)
 {
 	//shader = Shader("shader.vert", "shader.frag");
 	shader = Shader("tes_shader.vert", "tes_shader.frag", "tes_shader.tesc", "tes_shader.tese");

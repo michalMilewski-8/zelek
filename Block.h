@@ -14,7 +14,7 @@
 
 class ConstraintBox : public Object {
 public:
-	ConstraintBox(Shader sh, std::vector<glm::vec3>& pt);
+	ConstraintBox(Shader sh, std::shared_ptr<Parameters> params_, std::vector<glm::vec3>& pt);
 
 	void DrawObject(glm::mat4 mvp) override;
 
@@ -26,7 +26,7 @@ private:
 
 class BezierPoints : public Object {
 public:
-	BezierPoints(Shader sh, std::vector<std::shared_ptr<Point>>& pt);
+	BezierPoints(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& pt);
 
 	void DrawObject(glm::mat4 mvp) override;
 
@@ -43,7 +43,7 @@ private:
 
 class BezierSprings : public Object {
 public:
-	BezierSprings(Shader sh, std::vector<std::shared_ptr<Point>>& pt);
+	BezierSprings(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& pt);
 
 	void DrawObject(glm::mat4 mvp) override;
 
@@ -60,7 +60,7 @@ private:
 
 class FrameSprings : public Object {
 public:
-	FrameSprings(Shader sh, std::vector<std::shared_ptr<Point>>& bezier_points, std::vector<std::shared_ptr<Point>>& frame_points);
+	FrameSprings(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& bezier_points, std::vector<std::shared_ptr<Point>>& frame_points);
 
 	void DrawObject(glm::mat4 mvp) override;
 
@@ -77,7 +77,7 @@ private:
 
 class BezierBox : public Object {
 public:
-	BezierBox(Shader sh, std::vector<std::shared_ptr<Point>>& bezier_pts);
+	BezierBox(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& bezier_pts);
 
 	void DrawObject(glm::mat4 mvp) override;
 
@@ -96,7 +96,7 @@ class Block :
 	public Object
 {
 public:
-	Block(Shader sh);
+	Block(Shader sh, std::shared_ptr<Parameters> params_);
 
 	void DrawObject(glm::mat4 mvp) override;
 

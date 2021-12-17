@@ -20,6 +20,7 @@
 #include "imgui.h"
 #include "Virtual.h"
 #include "Dependencies/include/rapidxml-1.13/rapidxml.hpp"
+#include "Parameters.h"
 
 using namespace rapidxml;
 
@@ -27,7 +28,7 @@ class Object
 	
 {
 public:
-	Object(Shader& shader_, int number);
+	Object(Shader& shader_, int number, std::shared_ptr<Parameters> params_);
 	Object() = default;
 	~Object();
 	virtual void DrawObject(glm::mat4 mvp);
@@ -91,5 +92,6 @@ protected:
 
 	Shader shader;
 	bool moved{ false };
+	std::shared_ptr<Parameters> params;
 };
 

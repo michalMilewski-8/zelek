@@ -192,6 +192,7 @@
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Parameters.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Spring.h" />
     <ClInclude Include="stb_image.h" />

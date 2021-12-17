@@ -21,8 +21,9 @@ glm::quat Object::RotationBetweenVectors(glm::vec3 start, glm::vec3 dest) {
 
 }
 
-Object::Object(Shader& shader_, int number) :
+Object::Object(Shader& shader_, int number, std::shared_ptr<Parameters> params_) :
 	shader(shader_),
+	params(params_),
 	description_number(number),
 	translate(glm::mat4(1.0f)),
 	resize(glm::mat4(1.0f)),

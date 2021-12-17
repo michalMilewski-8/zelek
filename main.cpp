@@ -16,6 +16,7 @@
 #include "Block.h"
 #include "Cursor.h"
 #include "Grid.h"
+#include "Parameters.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -81,6 +82,8 @@ std::unique_ptr<Block> block;
 std::unique_ptr<Cursor> cursor;
 std::unique_ptr<Line> trajectory;
 
+std::shared_ptr<Parameters> params;
+
 void draw_scene();
 void draw_scene2();
 void framebuffer_size_callback(GLFWwindow* window_1, int width, int height);
@@ -122,6 +125,8 @@ int main() {
 
 	glfwMakeContextCurrent(window);
 
+	params = std::make_shared<Parameters>();
+
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
@@ -155,7 +160,7 @@ int main() {
 
 	gridShader = std::make_unique<Grid>();
 
-	block = std::make_unique<Block>(ourShader);
+	block = std::make_unique<Block>(ourShader, params);
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -329,6 +334,10 @@ void create_gui() {
 	ImGuiWindowFlags flags = 0;
 	//flags |= ImGuiWindowFlags_MenuBar;
 	ImGui::Begin("Main Menu##uu", &open, flags);
+
+	ImGui::SliderFloat("k", &params->k, 0.0f, 100.0f);
+	ImGui::SliderFloat("c1", &params->c1, 0.01f, 100.0f);
+	ImGui::SliderFloat("c2", &params->c2, 0.01f, 100.0f);
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	ImGui::End();

@@ -2,7 +2,7 @@
 
 unsigned int Line::counter = 1;
 
-Line::Line(Shader& sh) : Object(sh, 7)
+Line::Line(Shader& sh, std::shared_ptr<Parameters> params_) : Object(sh, 7, params_)
 {
 	sprintf_s(name, 512, ("Line " + std::to_string(counter)).c_str());
 	constname = "Line " + std::to_string(counter);
