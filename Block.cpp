@@ -111,15 +111,15 @@ void Block::update_object()
 void Block::create_stating_points()
 {
 	std::vector<glm::vec3> frame_points_tmp = {
-		{-1,-0,-0.5f },
-		{1,-0,-0.5f },
-		{1,-0,0.5f },
-		{-1,-0,0.5f },
+		{-1,-1,-1 },
+		{1,-1,-1 },
+		{1,-1,1 },
+		{-1,-1,1 },
 
-		{-1,1,-0.5f },
-		{1,1,-0.5f },
-		{1,1,0.5f },
-		{-1,1,0.5f }
+		{-1,1,-1 },
+		{1,1,-1 },
+		{1,1,1 },
+		{-1,1,1 }
 	};
 	for (auto pt : frame_points_tmp)
 	{
@@ -127,26 +127,25 @@ void Block::create_stating_points()
 	}
 
 	constraint_box_points = {
-	{-5,-0,-5 },
-	{5,-0,-5 },
-	{5,-0,5 },
-	{-5,-0,5 },
+	{-4,-4,-4 },
+	{4,-4,-4 },
+	{4,-4,4 },
+	{-4,-4,4 },
 
-	{-5,5,-5 },
-	{5,5,-5 },
-	{5,5,5 },
-	{-5,5,5 }
+	{-4,4,-4 },
+	{4,4,-4 },
+	{4,4,4 },
+	{-4,4,4 }
 	};
 
 
 	glm::vec3 curr_pos;
 	double mv = 2.0 / 3.0;
-	double mv2 = 1.0 / 3.0;
 
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			for (int k = 0; k < 4; k++) {
-				curr_pos = { -1.0f + i * mv ,0.0f + j * mv2,-0.5f + k * mv2 };
+				curr_pos = { -1.0f + i * mv ,-1.0f + j * mv,-1.0f + k * mv };
 				bezier_points.push_back(std::make_shared<Point>(curr_pos));
 			}
 		}
@@ -408,19 +407,19 @@ BezierSprings::BezierSprings(Shader sh, std::vector<std::shared_ptr<Point>>& fra
 				if (k < 3) {
 					springs.push_back(std::make_shared<Spring>(
 						frame_points[i * 16 + j * 4 + k],
-						frame_points[i * 16 + j * 4 + k + 1], false));
+						frame_points[i * 16 + j * 4 + k + 1], false, 15.0f));
 				}
 
 				if (j < 3) {
 					springs.push_back(std::make_shared<Spring>(
 						frame_points[i * 16 + j * 4 + k],
-						frame_points[i * 16 + (j + 1) * 4 + k], false));
+						frame_points[i * 16 + (j + 1) * 4 + k], false,15.0f));
 				}
 
 				if (i < 3) {
 					springs.push_back(std::make_shared<Spring>(
 						frame_points[i * 16 + j * 4 + k],
-						frame_points[(i + 1) * 16 + j * 4 + k], false));
+						frame_points[(i + 1) * 16 + j * 4 + k], false, 15.0f));
 				}
 			}
 		}
@@ -522,14 +521,14 @@ FrameSprings::FrameSprings(Shader sh, std::vector<std::shared_ptr<Point>>& bezie
 	points = {};
 	quads = {};
 
-	springs.push_back(std::make_shared<Spring>(frame_points[0], bezier_points[0], true));
-	springs.push_back(std::make_shared<Spring>(frame_points[1], bezier_points[48], true));
-	springs.push_back(std::make_shared<Spring>(frame_points[2], bezier_points[51], true));
-	springs.push_back(std::make_shared<Spring>(frame_points[3], bezier_points[3], true));
-	springs.push_back(std::make_shared<Spring>(frame_points[4], bezier_points[12], true));
-	springs.push_back(std::make_shared<Spring>(frame_points[5], bezier_points[60], true));
-	springs.push_back(std::make_shared<Spring>(frame_points[6], bezier_points[63], true));
-	springs.push_back(std::make_shared<Spring>(frame_points[7], bezier_points[15], true));
+	springs.push_back(std::make_shared<Spring>(frame_points[0], bezier_points[0],  true,20.0f));
+	springs.push_back(std::make_shared<Spring>(frame_points[1], bezier_points[48], true,20.0f));
+	springs.push_back(std::make_shared<Spring>(frame_points[2], bezier_points[51], true,20.0f));
+	springs.push_back(std::make_shared<Spring>(frame_points[3], bezier_points[3],  true,20.0f));
+	springs.push_back(std::make_shared<Spring>(frame_points[4], bezier_points[12], true,20.0f));
+	springs.push_back(std::make_shared<Spring>(frame_points[5], bezier_points[60], true,20.0f));
+	springs.push_back(std::make_shared<Spring>(frame_points[6], bezier_points[63], true,20.0f));
+	springs.push_back(std::make_shared<Spring>(frame_points[7], bezier_points[15], true,20.0f));
 
 	for (int i = 0; i < 16; i++) {
 		quads.push_back(i);
@@ -737,40 +736,4 @@ void BezierBox::DrawObject(glm::mat4 mvp) {
 	//glLineWidth(3.0f);
 	glDrawElements(GL_PATCHES, quads.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
-}
-
-Point::Point(glm::vec3 pos_) : pos(pos_)
-{
-	v = { 0.0f, 0.0f, 0.0f };
-	mass = 1.0f;
-	F = { 0.0f,0.0f,0.0f };
-}
-
-void Point::ApplyForce(float dt)
-{
-	auto v_new = (F / mass) + v;
-	auto pos_new = dt * v_new + pos;
-	pos = pos_new;
-	v = v_new;
-	F = { 0.0f,0.0f,0.0f };
-}
-
-Spring::Spring(std::shared_ptr<Point> p1_, std::shared_ptr<Point> p2_, bool p1_fixed_) : p1(p1_), p2(p2_), is_p1_fixed(p1_fixed_)
-{
-	neutral_length = glm::distance(p1->pos, p2->pos);
-	k = 10.0f;
-	c1 = 2.0f;
-}
-
-void Spring::RecalcSpring(float dt)
-{
-	auto l = glm::distance(p1->pos, p2->pos) - neutral_length;
-	auto dir = glm::normalize(p2->pos - p1->pos);
-	if (l == 0)
-		dir = { 0.0f,0.0f,0.0f };
-	auto f_val = dt * (c1 * l + k * l);
-	if (!is_p1_fixed) {
-		p1->F += f_val * dir;
-	}
-	p2->F += f_val * (-dir);
 }

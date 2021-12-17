@@ -1,6 +1,7 @@
 #pragma once
 #include "Object.h"
 #include "Line.h"
+#include "Spring.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,31 +11,6 @@
 #include <math.h>
 #define _USE_MATH_DEFINES
 #include <cmath>
-
-class Point
-{
-public:
-	Point(glm::vec3 pos_);
-	void ApplyForce(float dt);
-	glm::vec3 v;
-	glm::vec3 pos;
-	float mass;
-	glm::vec3 F;
-};
-
-class Spring
-{
-	bool is_p1_fixed;
-	float c1;
-	float k;
-	float neutral_length;
-public:
-	Spring(std::shared_ptr<Point> p1_, std::shared_ptr<Point> p2_, bool p1_fixed_);
-	void RecalcSpring(float dt);
-	std::shared_ptr<Point> p1;
-	std::shared_ptr<Point> p2;
-};
-
 
 class ConstraintBox : public Object {
 public:
