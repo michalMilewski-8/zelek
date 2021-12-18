@@ -16,8 +16,8 @@ void Block::CalculateFrame(float T)
 {
 	frame_springs->RecalcSprings(T);
 	bezier_springs->RecalcSprings(T);
-	for (auto p : frame_points)
-		p->ApplyForce(T);
+	//for (auto p : frame_points)
+	//	p->ApplyForce(T);
 	for (auto p : bezier_points)
 		p->ApplyForce(T);
 	bezier_vertices->UpdatePoints();
