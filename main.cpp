@@ -214,6 +214,7 @@ int main() {
 }
 
 void draw_scene() {
+	block->SetViewMat(view);
 	if (animate) {
 		float delta = deltaTime / iteration_per_frame;
 		for (int i = 0; i < iteration_per_frame; i++) {

@@ -82,6 +82,7 @@ public:
 	void DrawObject(glm::mat4 mvp) override;
 
 	void UpdatePoints();
+	glm::mat4 inv_view_mat;
 private:
 
 	void update_object() override;
@@ -101,6 +102,7 @@ public:
 	void DrawObject(glm::mat4 mvp) override;
 
 	void SetViewPos(glm::vec3 view_pos);
+	void SetViewMat(glm::mat4 view_mat);
 	void Update() override;
 
 	void DrawFrame(glm::mat4 mvp);
@@ -114,6 +116,7 @@ private:
 	void create_stating_points();
 
 	glm::vec3 view_pos;
+	glm::mat4 view_mat;
 
 	unsigned int texture;
 

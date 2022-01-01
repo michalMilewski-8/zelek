@@ -7,6 +7,12 @@ void Block::SetViewPos(glm::vec3 view_pos)
 	this->view_pos = view_pos;
 }
 
+void Block::SetViewMat(glm::mat4 view_mat)
+{
+	this->view_mat = view_mat;
+	bezier_box->inv_view_mat = glm::inverse(view_mat);
+}
+
 void Block::Update()
 {
 	need_update = true;
@@ -762,9 +768,8 @@ void BezierBox::DrawObject(glm::mat4 mvp) {
 
 	glBindVertexArray(VAO);
 
-	//glm::mat4 trmodel = glm::transpose(glm::inverse(model));
-	//int projectionLoc = glGetUniformLocation(shader.ID, "model");
-	//glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(model));
+	int projectionLoc = glGetUniformLocation(shader.ID, "invViewMatrix");
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(inv_view_mat));
 
 	//int trmodelLoc = glGetUniformLocation(shader.ID, "trmodel");
 	//glUniformMatrix4fv(trmodelLoc, 1, GL_FALSE, glm::value_ptr(trmodel));

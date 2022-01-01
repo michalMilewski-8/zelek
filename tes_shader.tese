@@ -3,8 +3,15 @@
 layout( quads, equal_spacing,cw) in;
 
 uniform mat4 mvp;
+uniform mat4 invViewMatrix;
 
 out vec4 f_color;
+out vec3 worldPos;
+out vec3 tangent;
+out vec3 binormal;
+out vec3 normal;
+out vec3 view;
+
 
 vec4 drawBrezier4(float t, vec4 B0, vec4 B1, vec4 B2, vec4 B3) {
     float one_minus_t = 1.0 - t;
@@ -19,6 +26,22 @@ vec4 drawBrezier4(float t, vec4 B0, vec4 B1, vec4 B2, vec4 B3) {
     vec4 B1_d_ = B1_ * one_minus_t + B2_ * t;
 
     return B0_d_ * one_minus_t + B1_d_ * t;
+}
+
+vec4 TangentVec(float t, vec4 B0, vec4 B1, vec4 B2, vec4 B3) {
+	float one_minus_t = 1.0 - t;
+
+	vec4 B0_ = 3.0f * (B1 - B0);
+	vec4 B1_ = 3.0f * (B2 - B1);
+	vec4 B2_ = 3.0f * (B3 - B2);
+
+	if (t == 0.0f) return B0_;
+	if (t >= 1.0f) return B2_;
+
+	vec4 B0_d_ = B0_ * one_minus_t + B1_ * t;
+	vec4 B1_d_ = B1_ * one_minus_t + B2_ * t;
+
+	return B0_d_ * one_minus_t + B1_d_ * t;
 }
 
 
@@ -54,6 +77,19 @@ void main( )
 
 	vec4 position = drawBrezier4(u,bu0,bu1,bu2,bu3);
 	gl_Position = mvp * position;
+	worldPos = position.xyz;
+
+	vec4 bv0 = drawBrezier4(u, p00, p01, p02, p03);
+	vec4 bv1 = drawBrezier4(u, p10, p11, p12, p13);
+	vec4 bv2 = drawBrezier4(u, p20, p21, p22, p23);
+	vec4 bv3 = drawBrezier4(u, p30, p31, p32, p33);
+
+	tangent = normalize(TangentVec(u, bu0, bu1, bu2, bu3)).xyz;
+	binormal = normalize(TangentVec(v, bv0, bv1, bv2, bv3)).xyz;
+	normal = normalize(cross(binormal, tangent));
+
+	vec3 camPos = mul(invViewMatrix, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
+	view = camPos - worldPos;
 
 	//gl_Position =mvp * vec4(u,p01.x,v,1);
 }
