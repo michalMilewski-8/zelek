@@ -700,13 +700,15 @@ void BezierBox::update_object()
 		quads.push_back(i);
 	}
 
-	for (int i = 48; i < 64; i++) {
-		quads.push_back(i);
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			quads.push_back(48 + j*4+i);
+		}
 	}
 
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			quads.push_back(i * 16 + j);
+			quads.push_back(j * 16 + i);
 		}
 	}
 
@@ -724,7 +726,7 @@ void BezierBox::update_object()
 
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			quads.push_back(i * 16 + j * 4 + 3);
+			quads.push_back(j * 16 + i * 4 + 3);
 		}
 	}
 
@@ -773,6 +775,8 @@ void BezierBox::DrawObject(glm::mat4 mvp) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//glDrawElements(GL_TRIANGLES, quads.size(), GL_UNSIGNED_INT, 0);
 	//glLineWidth(3.0f);
+	glEnable(GL_CULL_FACE);
 	glDrawElements(GL_PATCHES, quads.size(), GL_UNSIGNED_INT, 0);
+	glDisable(GL_CULL_FACE);
 	glBindVertexArray(0);
 }
