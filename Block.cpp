@@ -7,10 +7,11 @@ void Block::SetViewPos(glm::vec3 view_pos)
 	this->view_pos = view_pos;
 }
 
-void Block::SetViewMat(glm::mat4 view_mat)
+void Block::SetViewMat(glm::mat4 inv_view_mat)
 {
-	this->view_mat = view_mat;
-	bezier_box->inv_view_mat = glm::inverse(view_mat);
+	this->inv_view_mat = inv_view_mat;
+	bezier_box->inv_view_mat = inv_view_mat;
+	bezier_kaczor->inv_view_mat = inv_view_mat;
 }
 
 void Block::Update()
@@ -30,6 +31,7 @@ void Block::CalculateFrame(float T)
 	bezier_springs->UpdatePoints();
 	bezier_box->UpdatePoints();
 	frame_springs->UpdatePoints();
+	bezier_kaczor->UpdatePoints();
 }
 
 void Block::MoveFrame(glm::vec3 mvm)
@@ -170,6 +172,7 @@ Block::Block(Shader sh, std::shared_ptr<Parameters> params_) :
 	bezier_springs = std::make_unique<BezierSprings>(sh, params_, bezier_points);
 	frame_springs = std::make_unique<FrameSprings>(sh, params_, bezier_points, frame_points);
 	bezier_box = std::make_unique<BezierBox>(sh, params_, bezier_points);
+	bezier_kaczor = std::make_unique<BezierKaczor>(sh, params_, bezier_points);
 
 	update_object();
 }
@@ -218,8 +221,11 @@ void Block::DrawObject(glm::mat4 mvp)
 		bezier_springs->DrawObject(mvp);
 	if (params->draw_frame_springs)
 		frame_springs->DrawObject(mvp);
+	if (params->draw_kaczor)
+		bezier_kaczor->DrawObject(mvp);
 	if (params->draw_bezier_box)
 		bezier_box->DrawObject(mvp);
+
 }
 
 ConstraintBox::ConstraintBox(Shader sh, std::shared_ptr<Parameters> params_, std::vector<glm::vec3>& frame_points) :
@@ -784,4 +790,176 @@ void BezierBox::DrawObject(glm::mat4 mvp) {
 	glDrawElements(GL_PATCHES, quads.size(), GL_UNSIGNED_INT, 0);
 	glDisable(GL_CULL_FACE);
 	glBindVertexArray(0);
+}
+
+BezierKaczor::BezierKaczor(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& bezier_pts):
+Object(sh, 8, params_)
+{
+	//shader = Shader("shader.vert", "shader.frag");
+	shader = Shader("kaczor_shader.vert", "kaczor_shader.frag");
+	color = { 0.5,0,0.2,1.0 };
+	bezier_points = {};
+	points = {};
+	quads = {};
+	bezier_points_vec = {};
+
+	for (const auto& pt : bezier_pts) {
+		bezier_points.push_back(pt);
+	}
+
+	std::ifstream input;
+
+	input.open("resources\\duck\\duck.txt");
+
+	int vn, in, kn;
+	input >> vn;
+
+	std::vector<glm::vec3> verts_tmp(vn);
+	std::vector<glm::vec3> norms_tmp(vn);
+	std::vector<glm::vec2> tex_tmp(vn);
+
+	float minx = 100000, miny = 100000, minz = 100000;
+	float max = -1;
+	float maxx = -1;
+	float maxy = -1;
+	float maxz = -1;
+	for (auto i = 0; i < vn; ++i)
+	{
+		input >> verts_tmp[i].x >> verts_tmp[i].y >> verts_tmp[i].z;
+		input >> norms_tmp[i].x >> norms_tmp[i].y >> norms_tmp[i].z;
+		input >> tex_tmp[i].x >> tex_tmp[i].y;
+
+		if (verts_tmp[i].x < minx) minx = verts_tmp[i].x;
+		if (verts_tmp[i].y < miny) miny = verts_tmp[i].y;
+		if (verts_tmp[i].z < minz) minz = verts_tmp[i].z;
+	}
+
+	for (auto i = 0; i < vn; ++i)
+	{
+		verts_tmp[i].x -= minx;
+		verts_tmp[i].y -= miny;
+		verts_tmp[i].z -= minz;
+
+		if (verts_tmp[i].x > max) max = verts_tmp[i].x;
+		if (verts_tmp[i].y > max) max = verts_tmp[i].y;
+		if (verts_tmp[i].z > max) max = verts_tmp[i].z;
+
+		if (verts_tmp[i].x > maxx) maxx = verts_tmp[i].x;
+		if (verts_tmp[i].y > maxy) maxy = verts_tmp[i].y;
+		if (verts_tmp[i].z > maxz) maxz = verts_tmp[i].z;
+	}
+
+	maxx /= max;
+	maxy /= max;
+	maxz /= max;
+
+	maxx = (1.0f - maxx) / 2.0f;
+	maxy = (1.0f - maxy) / 2.0f;
+	maxz = (1.0f - maxz) / 2.0f;
+
+	for (auto i = 0; i < vn; ++i)
+	{
+		points.push_back(verts_tmp[i].x / max + maxx);
+		points.push_back(verts_tmp[i].y / max + maxy);
+		points.push_back(verts_tmp[i].z / max + maxz);
+
+		points.push_back(verts_tmp[i].x);
+		points.push_back(verts_tmp[i].y);
+		points.push_back(verts_tmp[i].z);
+
+		points.push_back(tex_tmp[i].x);
+		points.push_back(tex_tmp[i].y);
+	}
+
+	input >> in;
+	std::vector<unsigned short> inds(3 * in);
+	for (auto i = 0; i < in; ++i) {
+		input >> inds[3 * i] >> inds[3 * i + 1] >> inds[3 * i + 2];
+		quads.push_back(inds[3 * i]);
+		quads.push_back(inds[3 * i + 1]);
+		quads.push_back(inds[3 * i + 2]);
+	}
+
+	shader.use();
+	// 1. bind Vertex Array Object
+	glBindVertexArray(VAO);
+	// 2. copy our vertices array in a vertex buffer for OpenGL to use
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * points.size(), points.data(), GL_DYNAMIC_DRAW);
+	// 3. copy our index array in a element buffer for OpenGL to use
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * quads.size(), quads.data(), GL_DYNAMIC_DRAW);
+	// 4. then set the vertex attributes pointers
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, description_number * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, description_number * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, description_number * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load and generate the texture
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("resources/duck/ducktex.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+
+	auto texLocation = glGetUniformLocation(shader.ID, "wood_texture");
+	glUniform1i(texLocation, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	update_object();
+}
+
+void BezierKaczor::DrawObject(glm::mat4 mvp)
+{
+	if (need_update) {
+		update_object();
+		need_update = false;
+	}
+
+	Object::DrawObject(mvp);
+	glm::mat4 model = translate * rotate * resize;
+	glm::mat4 vp = mvp;
+	shader.use();
+
+	glBindVertexArray(VAO);
+
+	int projectionLoc = glGetUniformLocation(shader.ID, "invViewMatrix");
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(inv_view_mat));
+
+	int bezier_loc = glGetUniformLocation(shader.ID, "bezier_pts");
+	glUniform3fv(bezier_loc, 64, (GLfloat*)bezier_points_vec.data());
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawElements(GL_TRIANGLES, quads.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void BezierKaczor::UpdatePoints()
+{
+	need_update = true;
+}
+
+void BezierKaczor::update_object()
+{
+	bezier_points_vec.clear();
+	for (const auto& pt : bezier_points) {
+		bezier_points_vec.push_back(pt->pos);
+	}
 }

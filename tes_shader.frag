@@ -9,7 +9,7 @@ in vec3 view;
 
 const vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
 const float kd = 0.5, ks = 0.2f, m = 100.0f;
-const vec4 lightPos = vec4(1.0f, 2.0f, 0.0f, 1.0f);
+const vec4 lightPos = vec4(20.0f, 0.0f, 10.0f, 1.0f);
 
 void main()
 {

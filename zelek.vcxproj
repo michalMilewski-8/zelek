@@ -199,6 +199,8 @@
     <ClInclude Include="Virtual.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="kaczor_shader.frag" />
+    <None Include="kaczor_shader.vert" />
     <None Include="shader.frag" />
     <None Include="shader.vert" />
     <None Include="shader_grid.frag" />

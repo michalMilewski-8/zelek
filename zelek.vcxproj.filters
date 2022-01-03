@@ -158,5 +158,7 @@
     <None Include="tes_shader.tesc" />
     <None Include="tes_shader.tese" />
     <None Include="tes_shader.vert" />
+    <None Include="kaczor_shader.vert" />
+    <None Include="kaczor_shader.frag" />
   </ItemGroup>
 </Project>

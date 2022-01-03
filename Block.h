@@ -93,6 +93,28 @@ private:
 	std::vector<unsigned int> quads;
 };
 
+class BezierKaczor : public Object {
+public:
+	BezierKaczor(Shader sh, std::shared_ptr<Parameters> params_, std::vector<std::shared_ptr<Point>>& bezier_pts);
+
+	void DrawObject(glm::mat4 mvp) override;
+
+	void UpdatePoints();
+	glm::mat4 inv_view_mat;
+private:
+
+	void update_object() override;
+
+	std::vector<std::shared_ptr<Point>> bezier_points;
+
+	std::vector<glm::vec3> bezier_points_vec;
+
+	unsigned int texture;
+
+	std::vector<float> points;
+	std::vector<unsigned int> quads;
+};
+
 class Block :
 	public Object
 {
@@ -116,7 +138,7 @@ private:
 	void create_stating_points();
 
 	glm::vec3 view_pos;
-	glm::mat4 view_mat;
+	glm::mat4 inv_view_mat;
 
 	unsigned int texture;
 
@@ -136,4 +158,5 @@ private:
 	std::unique_ptr<BezierSprings> bezier_springs;
 	std::unique_ptr<FrameSprings> frame_springs;
 	std::unique_ptr<BezierBox> bezier_box;
+	std::unique_ptr<BezierKaczor> bezier_kaczor;
 };

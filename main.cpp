@@ -214,7 +214,7 @@ int main() {
 }
 
 void draw_scene() {
-	block->SetViewMat(view);
+	block->SetViewMat(view_i);
 	if (animate) {
 		float delta = deltaTime / iteration_per_frame;
 		for (int i = 0; i < iteration_per_frame; i++) {
@@ -345,6 +345,7 @@ void create_gui() {
 	ImGui::Checkbox("draw_frame_springs", &params->draw_frame_springs);
 	ImGui::Checkbox("draw_frame", &params->draw_frame);
 	ImGui::Checkbox("draw_bezier_box", &params->draw_bezier_box);
+	ImGui::Checkbox("draw_bezier_kaczor", &params->draw_kaczor);
 	ImGui::Checkbox("collision_version", &params->collision_version);
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
