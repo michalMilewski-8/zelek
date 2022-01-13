@@ -131,6 +131,7 @@ public:
 	void CalculateFrame(float T);
 
 	void MoveFrame(glm::vec3);
+	void RotateFrame(glm::quat);
 
 private:
 	void create_block_points();
@@ -147,6 +148,7 @@ private:
 	std::vector<glm::vec3> constraint_box_points;
 
 	glm::vec4 color = { 1,0.3,0,1 };
+	glm::vec3 center = { 0,0,0 };
 
 	Shader shader_bez;
 

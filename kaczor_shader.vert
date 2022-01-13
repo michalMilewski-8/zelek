@@ -150,7 +150,7 @@ void main()
     normal = normalize(pos - smallpos);
     tex = aTex;
 
-    vec3 camPos = mul(invViewMatrix, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
+    vec3 camPos = (invViewMatrix* vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
 	view = camPos - worldPos;
 
     gl_Position = mvp * vec4(pos, 1.0);

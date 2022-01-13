@@ -36,8 +36,19 @@ void Block::CalculateFrame(float T)
 
 void Block::MoveFrame(glm::vec3 mvm)
 {
+	center += mvm;
 	for (auto& pt : frame_points) {
 		pt->pos += mvm;
+	}
+	frame_springs->UpdatePoints();
+	Update();
+}
+
+void Block::RotateFrame(glm::quat rt)
+{
+	for (auto& pt : frame_points) {
+		auto vec = pt->pos - center;
+		pt->pos = center + glm::rotate(rt, vec);
 	}
 	frame_springs->UpdatePoints();
 	Update();

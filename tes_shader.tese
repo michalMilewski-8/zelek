@@ -1,4 +1,4 @@
-#version 400 core
+#version 440 core
 
 layout( quads, equal_spacing,cw) in;
 
@@ -88,7 +88,7 @@ void main( )
 	binormal = normalize(TangentVec(v, bv0, bv1, bv2, bv3)).xyz;
 	normal = normalize(cross(binormal, tangent));
 
-	vec3 camPos = mul(invViewMatrix, vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
+	vec3 camPos = (invViewMatrix* vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;
 	view = camPos - worldPos;
 
 	//gl_Position =mvp * vec4(u,p01.x,v,1);

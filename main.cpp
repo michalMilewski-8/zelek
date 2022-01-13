@@ -254,7 +254,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
 	{
 		glm::vec2 diff = (mousePosOld - mousePos) * PRECISION;
-		float cameraSpeed = 40 * deltaTime;
+		float cameraSpeed = 0.07;
 		float radius;
 		diff *= cameraSpeed;
 
@@ -264,24 +264,30 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 		auto rotation = Object::RotationBetweenVectors(lookAt - cameraPos, angle2);
 		auto roation = glm::toMat4(rotation);
-		angle += diff;
-		if (angle.y > 90.0f) angle.y = 90.0f - EPS;
-		if (angle.y < -90.0f) angle.y = -90.0f + EPS;
-		if (angle.x > 180.0f) angle.x = -180.0f + EPS;
-		if (angle.x < -180.0f) angle.x = 180.0f - EPS;
-		radius = glm::length(cameraPos - lookAt);
+		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+			block->RotateFrame(rotation);
+		}
 
-		cameraPos.x = lookAt.x + radius * glm::cos(glm::radians(angle.y)) * glm::cos(glm::radians(angle.x));
-		cameraPos.z = lookAt.z + radius * -glm::cos(glm::radians(angle.y)) * glm::sin(glm::radians(angle.x));
-		cameraPos.y = lookAt.y + radius * glm::sin(glm::radians(-angle.y));
+		else {
+			angle += diff;
+			if (angle.y > 90.0f) angle.y = 90.0f - EPS;
+			if (angle.y < -90.0f) angle.y = -90.0f + EPS;
+			if (angle.x > 180.0f) angle.x = -180.0f + EPS;
+			if (angle.x < -180.0f) angle.x = 180.0f - EPS;
+			radius = glm::length(cameraPos - lookAt);
 
-		cameraFront = glm::normalize(lookAt - cameraPos);
-		cam.LookAt(cameraPos, cameraFront, cameraUp);
+			cameraPos.x = lookAt.x + radius * glm::cos(glm::radians(angle.y)) * glm::cos(glm::radians(angle.x));
+			cameraPos.z = lookAt.z + radius * -glm::cos(glm::radians(angle.y)) * glm::sin(glm::radians(angle.x));
+			cameraPos.y = lookAt.y + radius * glm::sin(glm::radians(-angle.y));
+
+			cameraFront = glm::normalize(lookAt - cameraPos);
+			cam.LookAt(cameraPos, cameraFront, cameraUp);
+		}
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 	{
 		glm::vec2 diff = (mousePosOld - mousePos) * PRECISION;
-		float cameraSpeed = speed * deltaTime;
+		float cameraSpeed = 0.01;
 
 		glm::vec2 movement = diff * cameraSpeed;
 
@@ -295,7 +301,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
 		glm::vec2 diff = (mousePosOld - mousePos) * PRECISION;
-		float cameraSpeed = 2.6f * deltaTime;
+		float cameraSpeed = 0.01;
 
 		glm::vec2 movement = diff * cameraSpeed;
 
