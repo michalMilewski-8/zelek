@@ -200,6 +200,7 @@ int main() {
 		if (animate) {
 			T += deltaTime / animation_time;
 		}
+		params->rand = false;
 	}
 
 	// cleanup stuff
@@ -353,6 +354,10 @@ void create_gui() {
 	ImGui::Checkbox("draw_bezier_box", &params->draw_bezier_box);
 	ImGui::Checkbox("draw_bezier_kaczor", &params->draw_kaczor);
 	ImGui::Checkbox("collision_version", &params->collision_version);
+	if(ImGui::Button("Rand velocity"))
+	{
+		params->rand = true;
+	}
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	ImGui::End();

@@ -13,4 +13,5 @@ public:
 	bool draw_frame = true;
 	bool draw_bezier_box = true;
 	bool draw_kaczor = false;
+	bool rand = false;
 };

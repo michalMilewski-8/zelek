@@ -6,9 +6,26 @@ Point::Point(std::shared_ptr<Parameters> params_, glm::vec3 pos_) : params(param
 	F = { 0.0f,0.0f,0.0f };
 }
 
+double GetRand()
+{
+	double r = ((double)rand() / (RAND_MAX)) - 0.5f;
+	return r;
+}
+
 void Point::ApplyForce(float dt)
 {
 	float box_size = 4.0f;
+
+
+	if (params->rand)
+	{
+		auto rand_x = GetRand();
+		auto rand_y = GetRand();
+		auto rand_z = GetRand();
+
+		v += glm::vec3(rand_x, rand_y, rand_z);
+	}
+
 	F -= dt * params->k * v;
 	auto v_new = (F / mass) + v;
 	glm::vec3 pos_new = pos;
